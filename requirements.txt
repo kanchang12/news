@@ -1,6 +1,5 @@
 requests
 beautifulsoup4
-json
 schedule
 flask
 jinja2
