@@ -5,3 +5,8 @@ flask
 jinja2
 python-dotenv
 gunicorn
+Flask
+feedparser
+requests
+
+nltk
