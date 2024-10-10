@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional News Aggregator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #fff;
+        }
+
+        .card {
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+            border-radius: 0.5rem;
+            background-color: #181818;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .summary {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .dropdown {
+            margin: 0.5rem 0;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .navbar {
+            background-color: #121212;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Professional News Aggregator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">World</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Business</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Technology</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Science</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Sports</a>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <select id="source" class="form-select">
+                    <option value="all">All Sources</option>
+                    {% for source in sources %}
+                    <option value="{{ source }}">{{ source }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select id="category" class="form-select">
+                    <option value="all">All Categories</option>
+                    <option value="politics">Politics</option>
+                    <option value="war">War</option>
+                    <option value="finance">Finance</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button id="refresh-button" class="btn btn-primary">Refresh News</button>
+            </div>
+        </div>
+        <div id="news-container" class="mt-4"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function fetchNews() {
+            const source = $('#source').val();
+            const category = $('#category').val();
+            $.getJSON('/fetch_news', {source: source, category: category}, function(data) {
+                let newsHtml = '';
+                data.forEach(function(article) {
+                    newsHtml += `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${article.title}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">${article.source} - ${article.category}</h6>
+                                <p class="summary">${article.summary}</p>
+                                <a href="${article.link}" class="card-link" target="_blank">Read full article</a>
+                            </div>
+                        </div>`;
+                });
+                $('#news-container').html(newsHtml);
+            });
+        }
+
+        // Fetch news on page load
+        $(document).ready(function() {
+            fetchNews(); // Initial fetch
+            setInterval(fetchNews, 60000); // Refresh every 60 seconds
+
+            // Manual refresh button click
+            $('#refresh-button').click(function() {
+                fetchNews();
+            });
+        });
+    </script>
+</body>
+</html>
