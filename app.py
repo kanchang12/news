@@ -3,8 +3,6 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
 
 app = Flask(__name__)
 
@@ -61,7 +59,7 @@ def categorize_article(title, content):
 
 @app.route('/')
 def index():
-    return render_template('index.html', sources=list(RSS_FEEDS.keys()))
+    return render_template('index.html', sources=RSS_FEEDS.keys())
 
 @app.route('/fetch_news')
 def fetch_news():
@@ -71,7 +69,7 @@ def fetch_news():
     all_articles = []
     
     feeds_to_fetch = RSS_FEEDS.items() if source == 'all' else [(source, RSS_FEEDS[source])]
-    
+
     for src, url in feeds_to_fetch:
         try:
             feed = fetch_rss_feed(url)
@@ -79,24 +77,30 @@ def fetch_news():
                 link = entry.get('link', '')
                 if not link:
                     continue
-                    
+
                 content = entry.get('summary', '') or entry.get('description', '')
                 if not content:
                     content = scrape_article_content(link)
-                
+
                 summary = summarize_text(content)  # Get full text as summary
                 article_category = categorize_article(entry.title, content)
-                
+
+                # Get the published timestamp
+                published = entry.get('published', '')  # This may vary depending on the feed structure
+
+                # Append the article with timestamp
+                article = {
+                    'title': entry.get('title', 'No Title'),
+                    'source': src,
+                    'summary': summary,
+                    'category': article_category,
+                    'link': link,
+                    'timestamp': published  # Add the timestamp for new article checking
+                }
+
                 if category == 'all' or category == article_category:
-                    article = {
-                        'title': entry.get('title', 'No Title'),
-                        'source': src,
-                        'summary': summary,
-                        'category': article_category,
-                        'link': link
-                    }
                     all_articles.append(article)
-                    
+
         except Exception as e:
             print(f"Error fetching feed from {src}: {str(e)}")
     
